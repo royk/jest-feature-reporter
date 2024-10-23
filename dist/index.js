@@ -1,30 +1,33 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const reporters_1 = require("@jest/reporters");
+const fs_1 = __importDefault(require("fs"));
 class CustomReporter extends reporters_1.BaseReporter {
     // The constructor receives the globalConfig and options
     constructor(globalConfig, options) {
         super();
         this._globalConfig = globalConfig;
         this._options = options;
+        this._outputFile = options.outputFile || 'FEATURES.md';
     }
     // This method is called when the entire test suite starts
     onRunStart(aggregatedResults, options) {
         super.onRunStart(aggregatedResults, options);
-        console.log('Test run started');
     }
     // This method is called after a single test suite completes
     onTestResult(_test, _testResult, _results) {
-        console.log(`Finished test file: ${_test === null || _test === void 0 ? void 0 : _test.path}`);
-        console.log(`Total Tests: ${_testResult === null || _testResult === void 0 ? void 0 : _testResult.numPassingTests}`);
-        console.log(`Total Failed: ${_testResult === null || _testResult === void 0 ? void 0 : _testResult.numFailingTests}`);
     }
     // This method is called when all test suites have finished
     onRunComplete(testContexts, aggregatedResults) {
-        console.log('All tests completed');
-        console.log(`Total Tests Run: ${aggregatedResults.numTotalTests}`);
-        console.log(`Total Passed: ${aggregatedResults.numPassedTests}`);
-        console.log(`Total Failed: ${aggregatedResults.numFailedTests}`);
+        let stringBuilder = '';
+        stringBuilder += `# Features\n\n`;
+        stringBuilder += `Total Tests Run: ${aggregatedResults.numTotalTests}\n`;
+        stringBuilder += `Total Passed: ${aggregatedResults.numPassedTests}\n`;
+        stringBuilder += `Total Failed: ${aggregatedResults.numFailedTests}\n`;
+        fs_1.default.writeFileSync(this._outputFile, stringBuilder);
     }
 }
 module.exports = CustomReporter;

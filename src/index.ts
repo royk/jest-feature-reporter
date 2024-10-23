@@ -6,27 +6,30 @@ import type {
   TestContext
 } from '@jest/test-result';
 import type {Config } from '@jest/types';
+import fs from 'fs';
 
 export type ReporterOnStartOptions = {
   estimatedTime: number;
   showStatus: boolean;
+  outputFile?: string;
 };
 
 class CustomReporter extends BaseReporter {
   private readonly _globalConfig: Config.GlobalConfig;
   private readonly _options: ReporterOnStartOptions;
+  private readonly _outputFile: string;
   // The constructor receives the globalConfig and options
   constructor(globalConfig: Config.GlobalConfig, options: ReporterOnStartOptions) {
     super();
     this._globalConfig = globalConfig;
     this._options = options;
+    this._outputFile = options.outputFile || 'FEATURES.md';
   }
 
   // This method is called when the entire test suite starts
   onRunStart( aggregatedResults: AggregatedResult,
     options: ReporterOnStartOptions,) {
     super.onRunStart(aggregatedResults, options);
-    console.log('Test run started');
   }
 
   // This method is called after a single test suite completes
@@ -35,18 +38,17 @@ class CustomReporter extends BaseReporter {
     _testResult?: TestResult,
     _results?: AggregatedResult,
   ): void {
-    console.log(`Finished test file: ${_test?.path}`);
-    console.log(`Total Tests: ${_testResult?.numPassingTests}`);
-    console.log(`Total Failed: ${_testResult?.numFailingTests}`);
   }
 
   // This method is called when all test suites have finished
   onRunComplete(testContexts: Set<TestContext>,
     aggregatedResults: AggregatedResult,) {
-    console.log('All tests completed');
-    console.log(`Total Tests Run: ${aggregatedResults.numTotalTests}`);
-    console.log(`Total Passed: ${aggregatedResults.numPassedTests}`);
-    console.log(`Total Failed: ${aggregatedResults.numFailedTests}`);
+    let stringBuilder = '';
+    stringBuilder += `# Features\n\n`;
+    stringBuilder += `Total Tests Run: ${aggregatedResults.numTotalTests}\n`;
+    stringBuilder += `Total Passed: ${aggregatedResults.numPassedTests}\n`;
+    stringBuilder += `Total Failed: ${aggregatedResults.numFailedTests}\n`;
+    fs.writeFileSync(this._outputFile, stringBuilder);
   }
 }
 
