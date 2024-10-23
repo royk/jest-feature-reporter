@@ -14,7 +14,7 @@ export type ReporterOnStartOptions = {
   outputFile?: string;
 };
 
-class CustomReporter extends BaseReporter {
+class JestFeatureReporter extends BaseReporter {
   private readonly _globalConfig: Config.GlobalConfig;
   private readonly _options: ReporterOnStartOptions;
   private readonly _outputFile: string;
@@ -23,7 +23,7 @@ class CustomReporter extends BaseReporter {
     super();
     this._globalConfig = globalConfig;
     this._options = options;
-    this._outputFile = options.outputFile || 'FEATURES.md';
+    this._outputFile = options?.outputFile || 'FEATURES.md';
   }
 
   // This method is called when the entire test suite starts
@@ -52,4 +52,4 @@ class CustomReporter extends BaseReporter {
   }
 }
 
-module.exports = CustomReporter;
+module.exports = JestFeatureReporter;

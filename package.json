@@ -16,7 +16,21 @@
   },
   "jest": {
     "reporters": [
-      "./dist/index.js"
+      "./dist/index.js",
+      "default"
+    ],
+    "transform": {
+      "^.+\\.ts$": "ts-jest",
+      "^.+\\.js$": "babel-jest"
+    },
+    "moduleFileExtensions": [
+      "js",
+      "ts",
+      "json"
     ]
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.25.9",
+    "ts-jest": "^29.2.5"
   }
 }

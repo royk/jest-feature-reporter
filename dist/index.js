@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const reporters_1 = require("@jest/reporters");
 const fs_1 = __importDefault(require("fs"));
-class CustomReporter extends reporters_1.BaseReporter {
+class JestFeatureReporter extends reporters_1.BaseReporter {
     // The constructor receives the globalConfig and options
     constructor(globalConfig, options) {
         super();
@@ -30,4 +30,4 @@ class CustomReporter extends reporters_1.BaseReporter {
         fs_1.default.writeFileSync(this._outputFile, stringBuilder);
     }
 }
-module.exports = CustomReporter;
+module.exports = JestFeatureReporter;
