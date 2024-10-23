@@ -9,24 +9,54 @@ class JestFeatureReporter extends reporters_1.BaseReporter {
     // The constructor receives the globalConfig and options
     constructor(globalConfig, options) {
         super();
+        this._suites = [];
         this._globalConfig = globalConfig;
         this._options = options;
-        this._outputFile = options.outputFile || 'FEATURES.md';
+        this._outputFile = (options === null || options === void 0 ? void 0 : options.outputFile) || 'FEATURES.md';
     }
     // This method is called when the entire test suite starts
     onRunStart(aggregatedResults, options) {
         super.onRunStart(aggregatedResults, options);
     }
+    _groupTestsBySuites(testResults) {
+        const root = {
+            suites: [],
+            tests: [],
+            title: ''
+        };
+        testResults.forEach(testResult => {
+            let targetSuite = root;
+            // Find the target suite for this test,
+            // creating nested suites as necessary.
+            for (const title of testResult.ancestorTitles) {
+                let matchingSuite = targetSuite.suites.find(s => s.title === title);
+                if (!matchingSuite) {
+                    matchingSuite = {
+                        suites: [],
+                        tests: [],
+                        title
+                    };
+                    targetSuite.suites.push(matchingSuite);
+                }
+                targetSuite = matchingSuite;
+            }
+            targetSuite.tests.push(testResult);
+        });
+        return root;
+    }
     // This method is called after a single test suite completes
     onTestResult(_test, _testResult, _results) {
+        this._suites.push(this._groupTestsBySuites(_testResult.testResults).suites);
     }
     // This method is called when all test suites have finished
     onRunComplete(testContexts, aggregatedResults) {
         let stringBuilder = '';
-        stringBuilder += `# Features\n\n`;
-        stringBuilder += `Total Tests Run: ${aggregatedResults.numTotalTests}\n`;
-        stringBuilder += `Total Passed: ${aggregatedResults.numPassedTests}\n`;
-        stringBuilder += `Total Failed: ${aggregatedResults.numFailedTests}\n`;
+        this._suites.forEach(suite => {
+            stringBuilder += `## ${suite.title}\n\n`;
+            suite.tests && suite.tests.forEach(test => {
+                stringBuilder += `- ${test.title}\n`;
+            });
+        });
         fs_1.default.writeFileSync(this._outputFile, stringBuilder);
     }
 }
