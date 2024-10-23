@@ -32,14 +32,46 @@ const testResultBase: TestResult = {
       testResults: []
     };
 // sample.test.js
+describe("JestFeatureReporter", () => {
 describe('Features', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+  it("Describe blocks appear as headings. Nested describe blocks are nested headings", () => {
+    const reporter: Reporter = new JestFeatureReporter({}, {});
+    // @ts-ignore
+    reporter.onRunStart({}, {});
+    const featureTitle = "Features";
+    const subfeatureTitle = "Subfeature";
+    const passingEmoji = "✅";
+
+    const caseTitle = "Write to file";
+    const testResult: TestResult = JSON.parse(JSON.stringify(testResultBase)); // This creates a deep copy
+    testResult.testResults.push({
+      ancestorTitles: [featureTitle, subfeatureTitle],
+      failureDetails: [],
+      failureMessages: [],
+      status: "passed",
+      title: caseTitle,
+      fullName: caseTitle,
+      numPassingAsserts: 1
+    });
+    // @ts-ignore
+    reporter.onTestResult(null, testResult, null);
+    // @ts-ignore
+    reporter.onRunComplete(null,
+      null
+    );
+    const expectedOutput = `## ${featureTitle}\n  ### ${subfeatureTitle}\n- ${caseTitle}\n`;
+    expect(fs.writeFileSync).toHaveBeenCalledWith(expect.any(String), expectedOutput);
+  });
   it('writes results as markdown', () => {
     const reporter: Reporter = new JestFeatureReporter({}, {});
     // @ts-ignore
     reporter.onRunStart({}, {});
     const suiteName = "Features";
     const testName = "Write to file";
-    const testResult: TestResult = {...testResultBase};
+    const testResult: TestResult = JSON.parse(JSON.stringify(testResultBase));
     testResult.testResults.push({
       ancestorTitles: [suiteName],
       failureDetails: [],
@@ -49,14 +81,15 @@ describe('Features', () => {
       fullName: testName,
       numPassingAsserts: 1
     });
-     // @ts-ignore
+    // @ts-ignore
     reporter.onTestResult(null, testResult, null);
-     // @ts-ignore
+    // @ts-ignore
     reporter.onRunComplete(null,
       null
     );
-    const expectedOutput = `## ${suiteName}\n\n- ${testName}\n`;
-    expect(fs.writeFileSync).toHaveBeenCalledWith('FEATURES.md', expectedOutput);
+    const expectedOutput = `## ${suiteName}\n- ${testName}\n`;
+    expect(fs.writeFileSync).toHaveBeenCalledWith(expect.any(String), expectedOutput);
   });
 
+  });
 });

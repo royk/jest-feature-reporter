@@ -10,6 +10,7 @@ class JestFeatureReporter extends reporters_1.BaseReporter {
     constructor(globalConfig, options) {
         super();
         this._suites = [];
+        this._nestedLevel = 0;
         this._globalConfig = globalConfig;
         this._options = options;
         this._outputFile = (options === null || options === void 0 ? void 0 : options.outputFile) || 'FEATURES.md';
@@ -17,6 +18,8 @@ class JestFeatureReporter extends reporters_1.BaseReporter {
     // This method is called when the entire test suite starts
     onRunStart(aggregatedResults, options) {
         super.onRunStart(aggregatedResults, options);
+        this._suites = [];
+        this._nestedLevel = 0;
     }
     _groupTestsBySuites(testResults) {
         const root = {
@@ -51,14 +54,24 @@ class JestFeatureReporter extends reporters_1.BaseReporter {
             this._suites.push(suite);
         });
     }
+    _printSuite(suite) {
+        const headerPrefix = '  '.repeat(this._nestedLevel) + '#'.repeat(this._nestedLevel + 2);
+        let stringBuilder = `${headerPrefix} ${suite.title}\n`;
+        suite.suites && suite.suites.forEach(subSuite => {
+            this._nestedLevel++;
+            stringBuilder += this._printSuite(subSuite);
+            this._nestedLevel--;
+        });
+        suite.tests && suite.tests.forEach(test => {
+            stringBuilder += `- ${test.title}\n`;
+        });
+        return stringBuilder;
+    }
     // This method is called when all test suites have finished
     onRunComplete(testContexts, aggregatedResults) {
         let stringBuilder = '';
         this._suites.forEach(suite => {
-            stringBuilder += `## ${suite.title}\n\n`;
-            suite.tests && suite.tests.forEach(test => {
-                stringBuilder += `- ${test.title}\n`;
-            });
+            stringBuilder += this._printSuite(suite);
         });
         fs_1.default.writeFileSync(this._outputFile, stringBuilder);
     }

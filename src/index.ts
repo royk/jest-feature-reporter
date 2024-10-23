@@ -20,6 +20,7 @@ class JestFeatureReporter extends BaseReporter {
   private readonly _options: ReporterOnStartOptions;
   private readonly _outputFile: string;
   private _suites: any[] = [];
+  private _nestedLevel: number = 0;
 
   
   // The constructor receives the globalConfig and options
@@ -34,6 +35,8 @@ class JestFeatureReporter extends BaseReporter {
   onRunStart( aggregatedResults: AggregatedResult,
     options: ReporterOnStartOptions,) {
     super.onRunStart(aggregatedResults, options);
+    this._suites = [];
+    this._nestedLevel = 0;
   }
 
   _groupTestsBySuites(testResults:Array<AssertionResult>) {
@@ -71,10 +74,25 @@ class JestFeatureReporter extends BaseReporter {
     _results?: AggregatedResult,
   ): void {
     
+    
     const res = this._groupTestsBySuites(_testResult.testResults);
     res.suites.forEach(suite => {
       this._suites.push(suite);
     });
+  }
+
+  _printSuite(suite: any) {
+    const headerPrefix = '  '.repeat(this._nestedLevel) + '#'.repeat(this._nestedLevel+2);
+    let stringBuilder = `${headerPrefix} ${suite.title}\n`;
+    suite.suites && suite.suites.forEach(subSuite => {
+      this._nestedLevel++;
+      stringBuilder +=this._printSuite(subSuite);
+      this._nestedLevel--;
+    });
+    suite.tests && suite.tests.forEach(test => {
+      stringBuilder += `- ${test.title}\n`;
+    });
+    return stringBuilder;
   }
 
   // This method is called when all test suites have finished
@@ -83,10 +101,7 @@ class JestFeatureReporter extends BaseReporter {
     let stringBuilder = '';
 
     this._suites.forEach(suite => {
-      stringBuilder += `## ${suite.title}\n\n`;
-      suite.tests && suite.tests.forEach(test => {
-        stringBuilder += `- ${test.title}\n`;
-      });
+      stringBuilder +=this._printSuite(suite);
     });
     fs.writeFileSync(this._outputFile, stringBuilder);
   }
