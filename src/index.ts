@@ -16,7 +16,7 @@ export type ReporterOnStartOptions = {
 };
 
 class JestFeatureReporter extends BaseReporter {
-  private readonly _globalConfig: Coqnfig.GlobalConfig;
+  private readonly _globalConfig: Config.GlobalConfig;
   private readonly _options: ReporterOnStartOptions;
   private readonly _outputFile: string;
   private _suites: any[] = [];

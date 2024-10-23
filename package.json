@@ -15,11 +15,13 @@
     "typescript": "^5.6.3"
   },
   "jest": {
-    "reporters": [[
-      "./dist/index.js",
-      {
-        "outputFile": "README.md"
-      }],
+    "reporters": [
+      [
+        "./dist/index.js",
+        {
+          "outputFile": "README.md"
+        }
+      ],
       "default"
     ],
     "transform": {
@@ -34,6 +36,7 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.25.9",
+    "@types/jest": "^29.5.14",
     "ts-jest": "^29.2.5"
   }
 }
