@@ -9,12 +9,20 @@ describe('Features', () => {
   it('writes to file', () => {
     const reporter = new JestFeatureReporter();
     reporter.onRunStart();
+    const testResult = {
+      testFilePath: 'sample.test.js',
+      testResults: [{
+        "ancestorTitles": ["Features"],
+        "fullName": "Write to file",
+        "failureDetails": [],
+        "failureMessages": [],
+        "status": "passed",
+        "title": "Write to file"
+      }]
+    };
+    reporter.onTestResult(null, testResult, null);
     reporter.onRunComplete(null,
-      {
-        numTotalTests: 1,
-        numPassedTests: 1,
-        numFailedTests: 0
-      }
+      null
     );
     expect(fs.writeFileSync).toHaveBeenCalled();
   });
