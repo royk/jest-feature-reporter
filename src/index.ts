@@ -70,7 +70,13 @@ class JestFeatureReporter extends BaseReporter {
     _testResult?: TestResult,
     _results?: AggregatedResult,
   ): void {
-    this._suites.push(this._groupTestsBySuites(_testResult.testResults).suites);
+    
+    const res = this._groupTestsBySuites(_testResult.testResults);
+    
+    res.suites.forEach(suite => {
+      this._suites.push(suite);
+    });
+    console.log(JSON.stringify(this._suites) );
   }
 
   // This method is called when all test suites have finished
