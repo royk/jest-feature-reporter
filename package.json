@@ -15,8 +15,11 @@
     "typescript": "^5.6.3"
   },
   "jest": {
-    "reporters": [
+    "reporters": [[
       "./dist/index.js",
+      {
+        "outputFile": "README.md"
+      }],
       "default"
     ],
     "transform": {

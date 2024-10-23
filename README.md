@@ -1,1 +1,3 @@
-# jest-feature-reporter
+## Features
+
+- writes results as markdown

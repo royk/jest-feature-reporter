@@ -47,7 +47,6 @@ class JestFeatureReporter extends reporters_1.BaseReporter {
     // This method is called after a single test suite completes
     onTestResult(_test, _testResult, _results) {
         const res = this._groupTestsBySuites(_testResult.testResults);
-        console.log(JSON.stringify(_testResult));
         res.suites.forEach(suite => {
             this._suites.push(suite);
         });

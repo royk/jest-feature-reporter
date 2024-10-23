@@ -16,7 +16,7 @@ export type ReporterOnStartOptions = {
 };
 
 class JestFeatureReporter extends BaseReporter {
-  private readonly _globalConfig: Config.GlobalConfig;
+  private readonly _globalConfig: Coqnfig.GlobalConfig;
   private readonly _options: ReporterOnStartOptions;
   private readonly _outputFile: string;
   private _suites: any[] = [];
@@ -72,7 +72,6 @@ class JestFeatureReporter extends BaseReporter {
   ): void {
     
     const res = this._groupTestsBySuites(_testResult.testResults);
-    console.log(JSON.stringify(_testResult));
     res.suites.forEach(suite => {
       this._suites.push(suite);
     });
