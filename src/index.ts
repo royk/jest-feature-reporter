@@ -95,6 +95,11 @@ class JestFeatureReporter extends BaseReporter {
     return test.status;
   }
 
+  _getTestType(test: AssertionResult) {
+    const testTypeMatch = test.title.match(/\[([^\]]+)\]/);
+    return testTypeMatch ? testTypeMatch[1] : 'behavior';
+  }
+
   _printSuite(suite: any) {
     const headerPrefix = '  '.repeat(this._nestedLevel) + '#'.repeat(this._nestedLevel+2);
     let stringBuilder = `${headerPrefix} ${suite.title}\n`;
@@ -105,12 +110,7 @@ class JestFeatureReporter extends BaseReporter {
     });
     suite.tests && suite.tests.forEach(test => {
 
-      let testType = 'behavior';
-      // extract test type from square brackets
-      const testTypeMatch = test.title.match(/\[([^\]]+)\]/);
-      if (testTypeMatch) {
-        testType = testTypeMatch[1];
-      }
+      let testType = this._getTestType(test);
       if (testType!=='behavior') {
         return;
       }
