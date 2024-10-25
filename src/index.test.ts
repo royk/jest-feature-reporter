@@ -105,7 +105,7 @@ describe("JestFeatureReporter", () => {
       const expectedMarkdown = `## ${featureTitle}\n- ${failingEmoji} ${caseTitle}\n- ${skippedEmoji} ${caseTitle2}\n`;
       expect(fs.writeFileSync).toHaveBeenCalledWith(expect.any(String), expectedMarkdown);
     });
-    it("Tests can be prefixed with [test-type]. Behavioral tests appear as features. Unprefixed tests are assumed to be behavioral.", () => {
+    it("Tests can be prefixed with [test-type]. [behavior] tests appear as features. Unprefixed tests are assumed to be behavioral.", () => {
       const reporter: Reporter = new JestFeatureReporter({}, {});
       // @ts-ignore
       reporter.onRunStart({}, {});
