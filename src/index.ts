@@ -104,7 +104,19 @@ class JestFeatureReporter extends BaseReporter {
       this._nestedLevel--;
     });
     suite.tests && suite.tests.forEach(test => {
-      stringBuilder += `- ${this._getOutcome(test)} ${test.title}\n`;
+
+      let testType = 'behavior';
+      // extract test type from square brackets
+      const testTypeMatch = test.title.match(/\[([^\]]+)\]/);
+      if (testTypeMatch) {
+        testType = testTypeMatch[1];
+      }
+      if (testType!=='behavior') {
+        return;
+      }
+      // remove test type from title
+      const testTitle = test.title.replace(/\[([^\]]+)\]/g, '').trim();
+      stringBuilder += `- ${this._getOutcome(test)} ${testTitle}\n`;
     });
     return stringBuilder;
   }

@@ -106,7 +106,38 @@ describe("JestFeatureReporter", () => {
       expect(fs.writeFileSync).toHaveBeenCalledWith(expect.any(String), expectedMarkdown);
     });
     it("Tests can be prefixed with [test-type]. Behavioral tests appear as features. Unprefixed tests are assumed to be behavioral.", () => {
-      
+      const reporter: Reporter = new JestFeatureReporter({}, {});
+      // @ts-ignore
+      reporter.onRunStart({}, {});
+      const behaviorPrefix = "[behavior]";
+      const edgeCasePrefix = "[edge-case]";
+      const testResult: TestResult = JSON.parse(JSON.stringify(testResultBase)); // This creates a deep copy
+      testResult.testResults.push({
+        ancestorTitles: [featureTitle],
+        failureDetails: [],
+        failureMessages: [],
+        status: "passed",
+        title: `${behaviorPrefix} ${caseTitle}`,
+        fullName: `${behaviorPrefix} ${caseTitle}`,
+        numPassingAsserts: 1
+      });
+      testResult.testResults.push({
+        ancestorTitles: [featureTitle],
+        failureDetails: [],
+        failureMessages: [],
+        status: "passed",
+        title: `${edgeCasePrefix} ${caseTitle2}`,
+        fullName: `${edgeCasePrefix} ${caseTitle2}`,
+        numPassingAsserts: 1
+      });
+      // @ts-ignore
+      reporter.onTestResult(null, testResult, null);
+      // @ts-ignore
+      reporter.onRunComplete(null,
+        null
+      );
+      const expectedMarkdown = `## ${featureTitle}\n- ${passingEmoji} ${caseTitle}\n`;
+      expect(fs.writeFileSync).toHaveBeenCalledWith(expect.any(String), expectedMarkdown);
     });
   });
 });
