@@ -96,7 +96,7 @@ class JestFeatureReporter extends BaseReporter {
   }
 
   _getTestType(test: AssertionResult) {
-    const testTypeMatch = test.title.match(/\[([^\]]+)\]/);
+    const testTypeMatch = test.title.match(/^\[([^\]]+)\]/);
     return testTypeMatch ? testTypeMatch[1] : 'behavior';
   }
 
@@ -115,7 +115,7 @@ class JestFeatureReporter extends BaseReporter {
         return;
       }
       // remove test type from title
-      const testTitle = test.title.replace(/\[([^\]]+)\]/g, '').trim();
+      const testTitle = test.title.replace(/^\[([^\]]+)\]/g, '').trim();
       stringBuilder += `- ${this._getOutcome(test)} ${testTitle}\n`;
     });
     return stringBuilder;

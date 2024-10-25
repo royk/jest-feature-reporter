@@ -139,5 +139,29 @@ describe("JestFeatureReporter", () => {
       const expectedMarkdown = `## ${featureTitle}\n- ${passingEmoji} ${caseTitle}\n`;
       expect(fs.writeFileSync).toHaveBeenCalledWith(expect.any(String), expectedMarkdown);
     });
+    it('[edge-case] test types are only extracted from the beginning of the title', () => {
+      const reporter: Reporter = new JestFeatureReporter({}, {});
+      // @ts-ignore
+      reporter.onRunStart({}, {});
+      const edgeCasePrefix = "[edge-case]";
+      const testResult: TestResult = JSON.parse(JSON.stringify(testResultBase)); // This creates a deep copy
+      testResult.testResults.push({
+        ancestorTitles: [featureTitle],
+        failureDetails: [],
+        failureMessages: [],
+        status: "passed",
+        title: `${caseTitle} ${edgeCasePrefix}`,
+        fullName: `${caseTitle} ${edgeCasePrefix}`,
+        numPassingAsserts: 1
+      });
+      // @ts-ignore
+      reporter.onTestResult(null, testResult, null);
+      // @ts-ignore
+      reporter.onRunComplete(null,
+        null
+      );
+      const expectedMarkdown = `## ${featureTitle}\n- ${passingEmoji} ${caseTitle} ${edgeCasePrefix}\n`;
+      expect(fs.writeFileSync).toHaveBeenCalledWith(expect.any(String), expectedMarkdown);
+    });
   });
 });
