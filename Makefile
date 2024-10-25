@@ -7,4 +7,4 @@ test-watch:
 	npm test -- --watch
 
 build:
-	npm run build
+	npm run build && npm test

@@ -67,6 +67,10 @@ class JestFeatureReporter extends reporters_1.BaseReporter {
         }
         return test.status;
     }
+    _getTestType(test) {
+        const testTypeMatch = test.title.match(/\[([^\]]+)\]/);
+        return testTypeMatch ? testTypeMatch[1] : 'behavior';
+    }
     _printSuite(suite) {
         const headerPrefix = '  '.repeat(this._nestedLevel) + '#'.repeat(this._nestedLevel + 2);
         let stringBuilder = `${headerPrefix} ${suite.title}\n`;
@@ -76,7 +80,13 @@ class JestFeatureReporter extends reporters_1.BaseReporter {
             this._nestedLevel--;
         });
         suite.tests && suite.tests.forEach(test => {
-            stringBuilder += `- ${this._getOutcome(test)} ${test.title}\n`;
+            let testType = this._getTestType(test);
+            if (testType !== 'behavior') {
+                return;
+            }
+            // remove test type from title
+            const testTitle = test.title.replace(/\[([^\]]+)\]/g, '').trim();
+            stringBuilder += `- ${this._getOutcome(test)} ${testTitle}\n`;
         });
         return stringBuilder;
     }
