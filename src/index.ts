@@ -7,6 +7,7 @@ import type {
   AssertionResult
 } from '@jest/test-result';
 import type {Config } from '@jest/types';
+import { XFeatureReporter, TestSuite as XTestSuite, TestResult as XTestResult } from 'x-feature-reporter';
 import fs from 'fs';
 
 export type ReporterOnStartOptions = {
@@ -21,6 +22,7 @@ class JestFeatureReporter extends BaseReporter {
   private readonly _outputFile: string;
   private _suites: any[] = [];
   private _nestedLevel: number = 0;
+  private _featureReporter: XFeatureReporter;
 
   
   // The constructor receives the globalConfig and options
@@ -29,6 +31,7 @@ class JestFeatureReporter extends BaseReporter {
     this._globalConfig = globalConfig;
     this._options = options;
     this._outputFile = options?.outputFile || 'FEATURES.md';
+    this._featureReporter = new XFeatureReporter();
   }
 
   // This method is called when the entire test suite starts
@@ -121,15 +124,53 @@ class JestFeatureReporter extends BaseReporter {
     return stringBuilder;
   }
 
+  _convertSuiteToXFeatureReporter(suite) {
+    const xSuite = {
+      title: suite.title,
+      suites: [],
+      tests: [],
+    } as XTestSuite;
+    xSuite.suites = suite .suites.map((ss) => this._convertSuiteToXFeatureReporter(ss));
+    xSuite.tests = suite.tests
+    .map(t=> {
+      let testType = this._getTestType(t);
+      const title = t.title.replace(/^\[([^\]]+)\]/g, '').trim();
+      return {
+        title,
+        status: t.status,
+        testType,
+      }
+    })
+    .filter(t => t.testType === 'behavior')
+    .map(t => {
+      return{
+        title: t.title,
+        status: t.status,
+        testType: t.testType,
+      } as XTestResult});
+    return xSuite;
+  }
+
   // This method is called when all test suites have finished
   onRunComplete(testContexts: Set<TestContext>,
     aggregatedResults: AggregatedResult,) {
     let stringBuilder = '';
 
+    // this._suites.forEach(suite => {
+    //   stringBuilder +=this._printSuite(suite);
+    // });
+
+    const rootSuite:XTestSuite = {
+      title: 'Root',
+      suites: [],
+      tests: [],
+      transparent: true
+    };
     this._suites.forEach(suite => {
-      stringBuilder +=this._printSuite(suite);
+      rootSuite.suites.push(this._convertSuiteToXFeatureReporter(suite));
     });
-    fs.writeFileSync(this._outputFile, stringBuilder);
+    
+    this._featureReporter.generateReport(this._outputFile, rootSuite, '');
   }
 }
 

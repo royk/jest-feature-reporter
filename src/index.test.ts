@@ -70,7 +70,7 @@ describe("JestFeatureReporter", () => {
       reporter.onRunComplete(null,
         null
       );
-      const expectedOutput = `## ${featureTitle}\n  ### ${subfeatureTitle}\n- ${passingEmoji} ${caseTitle}\n`;
+      const expectedOutput = `\n## ${featureTitle}\n  ### ${subfeatureTitle}\n  - ${passingEmoji} ${caseTitle}\n`;
       expect(fs.writeFileSync).toHaveBeenCalledWith(expect.any(String), expectedOutput);
     });
     it(`Tests appear as list items representing features. Each feature is visually marked as Passing ${passingEmoji}, Failing ${failingEmoji} or Skipped ${skippedEmoji}`, () => {
@@ -102,7 +102,7 @@ describe("JestFeatureReporter", () => {
       reporter.onRunComplete(null,
         null
       );
-      const expectedMarkdown = `## ${featureTitle}\n- ${failingEmoji} ${caseTitle}\n- ${skippedEmoji} ${caseTitle2}\n`;
+      const expectedMarkdown = `\n## ${featureTitle}\n- ${failingEmoji} ${caseTitle}\n- ${skippedEmoji} ${caseTitle2}\n`;
       expect(fs.writeFileSync).toHaveBeenCalledWith(expect.any(String), expectedMarkdown);
     });
     it("Tests can be prefixed with [test-type]. [behavior] tests appear as features. Unprefixed tests are assumed to be behavioral.", () => {
@@ -136,7 +136,7 @@ describe("JestFeatureReporter", () => {
       reporter.onRunComplete(null,
         null
       );
-      const expectedMarkdown = `## ${featureTitle}\n- ${passingEmoji} ${caseTitle}\n`;
+      const expectedMarkdown = `\n## ${featureTitle}\n- ${passingEmoji} ${caseTitle}\n`;
       expect(fs.writeFileSync).toHaveBeenCalledWith(expect.any(String), expectedMarkdown);
     });
     it('[edge-case] test types are only extracted from the beginning of the title', () => {
@@ -160,7 +160,7 @@ describe("JestFeatureReporter", () => {
       reporter.onRunComplete(null,
         null
       );
-      const expectedMarkdown = `## ${featureTitle}\n- ${passingEmoji} ${caseTitle} ${edgeCasePrefix}\n`;
+      const expectedMarkdown = `\n## ${featureTitle}\n- ${passingEmoji} ${caseTitle} ${edgeCasePrefix}\n`;
       expect(fs.writeFileSync).toHaveBeenCalledWith(expect.any(String), expectedMarkdown);
     });
   });
