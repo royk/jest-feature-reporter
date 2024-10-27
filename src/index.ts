@@ -82,6 +82,8 @@ class JestFeatureReporter extends BaseReporter {
   }
 
   _getTestType(test: AssertionResult) {
+    // TODO:
+    // change format to [type:behavior]
     const testTypeMatch = test.title.match(/^\[([^\]]+)\]/);
     return testTypeMatch ? testTypeMatch[1] : 'behavior';
   }
