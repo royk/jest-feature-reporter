@@ -8,7 +8,6 @@ import type {
 } from '@jest/test-result';
 import type {Config } from '@jest/types';
 import { XFeatureReporter, TestSuite as XTestSuite, TestResult as XTestResult } from 'x-feature-reporter';
-import fs from 'fs';
 
 export type ReporterOnStartOptions = {
   estimatedTime: number;
@@ -21,7 +20,6 @@ class JestFeatureReporter extends BaseReporter {
   private readonly _options: ReporterOnStartOptions;
   private readonly _outputFile: string;
   private _suites: any[] = [];
-  private _nestedLevel: number = 0;
   private _featureReporter: XFeatureReporter;
 
   
@@ -39,7 +37,6 @@ class JestFeatureReporter extends BaseReporter {
     options: ReporterOnStartOptions,) {
     super.onRunStart(aggregatedResults, options);
     this._suites = [];
-    this._nestedLevel = 0;
   }
 
   _groupTestsBySuites(testResults:Array<AssertionResult>) {
@@ -84,44 +81,9 @@ class JestFeatureReporter extends BaseReporter {
     });
   }
 
-  _getOutcome(test) {
-    switch (test.status) {
-      case 'skipped':
-        return ':construction:';
-      case 'passed':
-        return ':white_check_mark:';
-      case 'failed':
-        return ':x:';
-      case 'focused':
-        return ':warning:';
-    }
-    return test.status;
-  }
-
   _getTestType(test: AssertionResult) {
     const testTypeMatch = test.title.match(/^\[([^\]]+)\]/);
     return testTypeMatch ? testTypeMatch[1] : 'behavior';
-  }
-
-  _printSuite(suite: any) {
-    const headerPrefix = '  '.repeat(this._nestedLevel) + '#'.repeat(this._nestedLevel+2);
-    let stringBuilder = `${headerPrefix} ${suite.title}\n`;
-    suite.suites && suite.suites.forEach(subSuite => {
-      this._nestedLevel++;
-      stringBuilder +=this._printSuite(subSuite);
-      this._nestedLevel--;
-    });
-    suite.tests && suite.tests.forEach(test => {
-
-      let testType = this._getTestType(test);
-      if (testType!=='behavior') {
-        return;
-      }
-      // remove test type from title
-      const testTitle = test.title.replace(/^\[([^\]]+)\]/g, '').trim();
-      stringBuilder += `- ${this._getOutcome(test)} ${testTitle}\n`;
-    });
-    return stringBuilder;
   }
 
   _convertSuiteToXFeatureReporter(suite) {
@@ -151,15 +113,8 @@ class JestFeatureReporter extends BaseReporter {
     return xSuite;
   }
 
-  // This method is called when all test suites have finished
   onRunComplete(testContexts: Set<TestContext>,
     aggregatedResults: AggregatedResult,) {
-    let stringBuilder = '';
-
-    // this._suites.forEach(suite => {
-    //   stringBuilder +=this._printSuite(suite);
-    // });
-
     const rootSuite:XTestSuite = {
       title: 'Root',
       suites: [],
