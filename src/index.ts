@@ -7,13 +7,15 @@ import type {
   AssertionResult
 } from '@jest/test-result';
 import type {Config } from '@jest/types';
-import { XFeatureReporter, TestSuite as XTestSuite, TestResult as XTestResult } from 'x-feature-reporter';
+import { XFeatureReporter, TestSuite as XTestSuite, TestResult as XTestResult, XFeatureReporterOptions } from 'x-feature-reporter';
 
 export type ReporterOnStartOptions = {
   estimatedTime: number;
   showStatus: boolean;
   outputFile?: string;
 };
+
+export const embeddingPlaceholder = 'jest-feature-reporter';
 
 class JestFeatureReporter extends BaseReporter {
   private readonly _globalConfig: Config.GlobalConfig;
@@ -126,8 +128,10 @@ class JestFeatureReporter extends BaseReporter {
     this._suites.forEach(suite => {
       rootSuite.suites.push(this._convertSuiteToXFeatureReporter(suite));
     });
-    
-    this._featureReporter.generateReport(this._outputFile, rootSuite, '');
+    const options: XFeatureReporterOptions = {
+      embeddingPlaceholder
+    };
+    this._featureReporter.generateReport(this._outputFile, rootSuite, options);
   }
 }
 
