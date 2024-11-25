@@ -7,7 +7,8 @@ import type {
   AssertionResult
 } from '@jest/test-result';
 import type {Config } from '@jest/types';
-import { XFeatureReporter, TestSuite as XTestSuite, TestResult as XTestResult, XFeatureReporterOptions } from 'x-feature-reporter';
+import { XFeatureReporter, XTestSuite as XTestSuite, XTestResult as XTestResult } from 'x-feature-reporter';
+import { MarkdownAdapter, MarkdownAdapterOptions } from 'x-feature-reporter/adapters/markdown';
 
 export type ReporterOnStartOptions = {
   estimatedTime: number;
@@ -18,20 +19,14 @@ export type ReporterOnStartOptions = {
 export const embeddingPlaceholder = 'jest-feature-reporter';
 
 class JestFeatureReporter extends BaseReporter {
-  private readonly _globalConfig: Config.GlobalConfig;
-  private readonly _options: ReporterOnStartOptions;
   private readonly _outputFile: string;
   private _suites: any[] = [];
-  private _featureReporter: XFeatureReporter;
 
   
   // The constructor receives the globalConfig and options
   constructor(globalConfig: Config.GlobalConfig, options: ReporterOnStartOptions) {
     super();
-    this._globalConfig = globalConfig;
-    this._options = options;
     this._outputFile = options?.outputFile || 'FEATURES.md';
-    this._featureReporter = new XFeatureReporter();
   }
 
   // This method is called when the entire test suite starts
@@ -128,10 +123,11 @@ class JestFeatureReporter extends BaseReporter {
     this._suites.forEach(suite => {
       rootSuite.suites.push(this._convertSuiteToXFeatureReporter(suite));
     });
-    const options: XFeatureReporterOptions = {
+    const reporter = new XFeatureReporter(new MarkdownAdapter({
+      outputFile: this._outputFile,
       embeddingPlaceholder
-    };
-    this._featureReporter.generateReport(this._outputFile, rootSuite, options);
+    } as MarkdownAdapterOptions));
+    reporter.generateReport(rootSuite);
   }
 }
 

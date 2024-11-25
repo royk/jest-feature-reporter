@@ -1,13 +1,15 @@
 import fs from 'fs';
 import { Reporter } from '@jest/reporters';
 import type {TestResult} from '@jest/test-result';
+import { TEST_PREFIX_FAILED, TEST_PREFIX_SKIPPED } from 'x-feature-reporter/adapters/markdown';
+import { TEST_PREFIX_PASSED } from 'x-feature-reporter/adapters/markdown';
 const JestFeatureReporter = require('./index').default || require('./index');
 
 jest.mock('fs');
 
-const passingEmoji = ':white_check_mark:';
-const failingEmoji = ':x:';
-const skippedEmoji = ':construction:';
+const passingEmoji = TEST_PREFIX_PASSED;
+const failingEmoji = TEST_PREFIX_FAILED;
+const skippedEmoji = TEST_PREFIX_SKIPPED;
 
 const featureTitle = "Features";
 const subfeatureTitle = "Subfeature";
