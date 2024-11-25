@@ -3,3 +3,4 @@ export type ReporterOnStartOptions = {
     showStatus: boolean;
     outputFile?: string;
 };
+export declare const embeddingPlaceholder = "jest-feature-reporter";

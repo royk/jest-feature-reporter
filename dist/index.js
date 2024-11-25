@@ -1,25 +1,21 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.embeddingPlaceholder = void 0;
 const reporters_1 = require("@jest/reporters");
-const fs_1 = __importDefault(require("fs"));
+const x_feature_reporter_1 = require("x-feature-reporter");
+const markdown_1 = require("x-feature-reporter/adapters/markdown");
+exports.embeddingPlaceholder = 'jest-feature-reporter';
 class JestFeatureReporter extends reporters_1.BaseReporter {
     // The constructor receives the globalConfig and options
     constructor(globalConfig, options) {
         super();
         this._suites = [];
-        this._nestedLevel = 0;
-        this._globalConfig = globalConfig;
-        this._options = options;
         this._outputFile = (options === null || options === void 0 ? void 0 : options.outputFile) || 'FEATURES.md';
     }
     // This method is called when the entire test suite starts
     onRunStart(aggregatedResults, options) {
         super.onRunStart(aggregatedResults, options);
         this._suites = [];
-        this._nestedLevel = 0;
     }
     _groupTestsBySuites(testResults) {
         const root = {
@@ -54,49 +50,54 @@ class JestFeatureReporter extends reporters_1.BaseReporter {
             this._suites.push(suite);
         });
     }
-    _getOutcome(test) {
-        switch (test.status) {
-            case 'skipped':
-                return ':construction:';
-            case 'passed':
-                return ':white_check_mark:';
-            case 'failed':
-                return ':x:';
-            case 'focused':
-                return ':warning:';
-        }
-        return test.status;
-    }
     _getTestType(test) {
+        // TODO:
+        // change format to [type:behavior]
         const testTypeMatch = test.title.match(/^\[([^\]]+)\]/);
         return testTypeMatch ? testTypeMatch[1] : 'behavior';
     }
-    _printSuite(suite) {
-        const headerPrefix = '  '.repeat(this._nestedLevel) + '#'.repeat(this._nestedLevel + 2);
-        let stringBuilder = `${headerPrefix} ${suite.title}\n`;
-        suite.suites && suite.suites.forEach(subSuite => {
-            this._nestedLevel++;
-            stringBuilder += this._printSuite(subSuite);
-            this._nestedLevel--;
+    _convertSuiteToXFeatureReporter(suite) {
+        const xSuite = {
+            title: suite.title,
+            suites: [],
+            tests: [],
+        };
+        xSuite.suites = suite.suites.map((ss) => this._convertSuiteToXFeatureReporter(ss));
+        xSuite.tests = suite.tests
+            .map(t => {
+            let testType = this._getTestType(t);
+            const title = t.title.replace(/^\[([^\]]+)\]/g, '').trim();
+            return {
+                title,
+                status: t.status,
+                testType,
+            };
+        })
+            .filter(t => t.testType === 'behavior')
+            .map(t => {
+            return {
+                title: t.title,
+                status: t.status,
+                testType: t.testType,
+            };
         });
-        suite.tests && suite.tests.forEach(test => {
-            let testType = this._getTestType(test);
-            if (testType !== 'behavior') {
-                return;
-            }
-            // remove test type from title
-            const testTitle = test.title.replace(/^\[([^\]]+)\]/g, '').trim();
-            stringBuilder += `- ${this._getOutcome(test)} ${testTitle}\n`;
-        });
-        return stringBuilder;
+        return xSuite;
     }
-    // This method is called when all test suites have finished
     onRunComplete(testContexts, aggregatedResults) {
-        let stringBuilder = '';
+        const rootSuite = {
+            title: 'Root',
+            suites: [],
+            tests: [],
+            transparent: true
+        };
         this._suites.forEach(suite => {
-            stringBuilder += this._printSuite(suite);
+            rootSuite.suites.push(this._convertSuiteToXFeatureReporter(suite));
         });
-        fs_1.default.writeFileSync(this._outputFile, stringBuilder);
+        const reporter = new x_feature_reporter_1.XFeatureReporter(new markdown_1.MarkdownAdapter({
+            outputFile: this._outputFile,
+            embeddingPlaceholder: exports.embeddingPlaceholder
+        }));
+        reporter.generateReport(rootSuite);
     }
 }
 module.exports = JestFeatureReporter;
