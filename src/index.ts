@@ -8,7 +8,12 @@ import type {
 } from '@jest/test-result';
 import type {Config } from '@jest/types';
 import { XFeatureReporter, XTestSuite as XTestSuite, XTestResult as XTestResult } from 'x-feature-reporter';
-import { MarkdownAdapter, MarkdownAdapterOptions } from 'x-feature-reporter/adapters/markdown';
+
+const { MarkdownAdapter, MarkdownAdapterOptions } = require('x-feature-reporter/adapters/markdown');
+
+
+type MarkdownAdapterOptions = typeof MarkdownAdapterOptions;
+
 
 export type ReporterOnStartOptions = {
   estimatedTime: number;

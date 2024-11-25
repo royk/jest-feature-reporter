@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.embeddingPlaceholder = void 0;
 const reporters_1 = require("@jest/reporters");
 const x_feature_reporter_1 = require("x-feature-reporter");
-const markdown_1 = require("x-feature-reporter/adapters/markdown");
+const { MarkdownAdapter, MarkdownAdapterOptions } = require('x-feature-reporter/adapters/markdown');
 exports.embeddingPlaceholder = 'jest-feature-reporter';
 class JestFeatureReporter extends reporters_1.BaseReporter {
     // The constructor receives the globalConfig and options
@@ -93,7 +93,7 @@ class JestFeatureReporter extends reporters_1.BaseReporter {
         this._suites.forEach(suite => {
             rootSuite.suites.push(this._convertSuiteToXFeatureReporter(suite));
         });
-        const reporter = new x_feature_reporter_1.XFeatureReporter(new markdown_1.MarkdownAdapter({
+        const reporter = new x_feature_reporter_1.XFeatureReporter(new MarkdownAdapter({
             outputFile: this._outputFile,
             embeddingPlaceholder: exports.embeddingPlaceholder
         }));
